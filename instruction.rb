@@ -1,53 +1,11 @@
-Instruction = { #|   The 6502 microprocessor instruction set:
+Instruction = {
+
+  # The 6502 microprocessor instruction set:
+
   by_code: [
-  # The following notation applies to this summary:
-  #
-  #    A       Accumulator                  EOR     Logical Exclusive Or
-  #    X, Y    Index Registers              fromS   Transfer from Stack
-  #    M       Memory                       toS     Transfer to Stack
-  #    P       Processor Status Register    ->      Transfer to
-  #    S       Stack Pointer                <-      Transfer from
-  #    /       Change                       ||       Logical OR
-  #    _       No Change                    PC      Program Counter
-  #    +       Add                          PCH     Program Counter High
-  #    &&      Logical AND                  PCL     Program Counter Low
-  #    -       Subtract                     OPER    OPERAND
-  #                                         #       IMMEDIATE ADDRESSING MODE
 
     :adc, # add memory to accumulator with carry
-    #  Operation:  A + M + C -> A, C                         N Z C I D V
-    #                                                        / / / _ _ /
-    #  +----------------+-----------------------+---------+---------+----------+
-    #  | Addressing Mode| Assembly Language Form| OP CODE |No. Bytes|No. Cycles|
-    #  +----------------+-----------------------+---------+---------+----------+
-    #  |  Immediate     |   ADC #Oper           |    69   |    2    |    2     |
-    #  |  Zero Page     |   ADC Oper            |    65   |    2    |    3     |
-    #  |  Zero Page,X   |   ADC Oper,X          |    75   |    2    |    4     |
-    #  |  Absolute      |   ADC Oper            |    60   |    3    |    4     |
-    #  |  Absolute,X    |   ADC Oper,X          |    70   |    3    |    4*    |
-    #  |  Absolute,Y    |   ADC Oper,Y          |    79   |    3    |    4*    |
-    #  |  (Indirect,X)  |   ADC (Oper,X)        |    61   |    2    |    6     |
-    #  |  (Indirect),Y  |   ADC (Oper),Y        |    71   |    2    |    5*    |
-    #  +----------------+-----------------------+---------+---------+----------+
-    #  * Add 1 if page boundary is crossed.
-
     :and, # 'and' memory with accumulator
-    #  Operation:  A && M -> A                               N Z C I D V
-    #                                                        / / _ _ _ _
-    #  +----------------+-----------------------+---------+---------+----------+
-    #  | Addressing Mode| Assembly Language Form| OP CODE |No. Bytes|No. Cycles|
-    #  +----------------+-----------------------+---------+---------+----------+
-    #  |  Immediate     |   AND #Oper           |    29   |    2    |    2     |
-    #  |  Zero Page     |   AND Oper            |    25   |    2    |    3     |
-    #  |  Zero Page,X   |   AND Oper,X          |    35   |    2    |    4     |
-    #  |  Absolute      |   AND Oper            |    2D   |    3    |    4     |
-    #  |  Absolute,X    |   AND Oper,X          |    3D   |    3    |    4*    |
-    #  |  Absolute,Y    |   AND Oper,Y          |    39   |    3    |    4*    |
-    #  |  (Indirect,X)  |   AND (Oper,X)        |    21   |    2    |    6     |
-    #  |  (Indirect,Y)  |   AND (Oper),Y        |    31   |    2    |    5     |
-    #  +----------------+-----------------------+---------+---------+----------+
-    #  * Add 1 if page boundary is crossed.
-
     :asl, # shift left one bit (memory or accumulator)
     :bcc, # branch on carry clear
     :bcs, # branch on carry set
