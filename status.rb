@@ -33,6 +33,28 @@ Status = Struct.new(
   # positive.
   ) do
 
+  def value
+    (carry    ) |
+    (zero << 1) |
+    (int  << 2) |
+    (dec  << 3) |
+    (brk  << 4) |
+    (na   << 5) |
+    (over << 6) |
+    (sign << 7)
+  end
+
+  def value=(value)
+    carry = (value     ) & 1
+    zero  = (value >> 1) & 1
+    int   = (value >> 2) & 1
+    dec   = (value >> 3) & 1
+    brk   = (value >> 4) & 1
+    na    = (value >> 5) & 1
+    over  = (value >> 6) & 1
+    sign  = (value >> 7) & 1
+  end
+
   def self.init
     new *[FLUSH]*8
   end
