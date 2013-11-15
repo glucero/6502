@@ -28,6 +28,7 @@ class CPU
   end
 
   def execute(code, address, cycle)
+    Command.new(code, address).execute register, status, cycle
   end
 
   def status
