@@ -1,18 +1,26 @@
-class Command
+class OpCode
 
   class InvalidOpCode < StandardError; end
 
-  def initialize(code, address)
-    @code, @address = code, address
+  attr_accessor :code,
+                :address,
+                :register,
+                :status,
+                :cycle
+
+  def initialize(code)
+    @code = code
+
+    yield self
   end
 
-  def execute(register, status, cycle)
-    send Instruction[:by_code].fetch(code & 0xFF, :not_found), register, status, cycle
+  def execute
+    send Instruction[:by_code].fetch(code & 0xFF, :not_found)
   end
 
   private
 
-  def adc(register, status, cycle)
+  def adc
     temp = register.acc + load(address) + status.carry
 
     status.over = !(((register.acc ^ load(address)) & 0x80).zero? &&
@@ -25,7 +33,7 @@ class Command
     cycle[:count] += cycle[:add]
   end
 
-  def and(register, status, cycle)
+  def and
     register.acc &= load(address)
     status.sign   = (register.acc >> 7) & 1
     status.zero   =  register.acc
@@ -33,7 +41,7 @@ class Command
     cycle[:count] += cycle[:add] if addr_mode != Address[:by_name][:postind]
   end
 
-  def asl(register, status, cycle)
+  def asl
     if Address[:by_name][:acc] == addr_mode
 
       status.carry = (register.acc >> 7) & 1
@@ -52,21 +60,21 @@ class Command
     end
   end
 
-  def bcc(register, status, cycle)
+  def bcc
     if status.carry.zero?
       cycle[:count] += page_crossed?(op_address, address)? 2 : 1
       status.pc = address
     end
   end
 
-  def bcs(register, status, cycle)
+  def bcs
     if status.zero.zero?
       cycle[:count] += page_crossed?(op_address, address)? 2 : 1
       status.pc = address
     end
   end
 
-  def beq(register, status, cycle)
+  def beq
     if status.carry == 1
       cycle[:count] += page_crossed?(op_address, address)? 2 : 1
 
@@ -74,7 +82,7 @@ class Command
     end
   end
 
-  def bit(register, status, cycle)
+  def bit
     temp        = load(address)
     status.sign = (temp >> 7) & 1
     status.over = (temp >> 6) & 1
@@ -83,14 +91,14 @@ class Command
     status.zero = temp
   end
 
-  def bmi(register, status, cycle)
+  def bmi
     if status.sign == 1
       cycle[:count] += 1
       status.pc = address
     end
   end
 
-  def bne(register, status, cycle)
+  def bne
     if !status.zero.zero?
       cycle[:count] += page_crossed?(op_address, address)? 2 : 1
 
@@ -98,13 +106,13 @@ class Command
     end
   end
 
-  def bpl(register, status, cycle)
+  def bpl
     if status.sign.zero?
       cycle[:count] += page_crossed?(op_address, address)? 2 : 1
     end
   end
 
-  def brk(register, status, cycle)
+  def brk
     status.pc += 2
     push((status.pc >> 8) & 0xFF)
     push(status.pc        & 0xFF)
@@ -126,37 +134,37 @@ class Command
     status.pc -= 1
   end
 
-  def bvc(register, status, cycle)
+  def bvc
     if status.over.zero?
       cycle[:count] += page_crossed?(op_address, address)? 2 : 1
       status.pc = address
     end
   end
 
-  def bvs(register, status, cycle)
+  def bvs
     if status.over == 1
       cycle[:count] += page_crossed?(op_address, address)? 2 : 1
       status.pc = address
     end
   end
 
-  def clc(register, status, cycle)
+  def clc
     status.carry = 0
   end
 
-  def cld(register, status, cycle)
+  def cld
     status.dec = 0
   end
 
-  def cli(register, status, cycle)
+  def cli
     status.int = 0
   end
 
-  def clv(register, status, cycle)
+  def clv
     status.over = 0
   end
 
-  def cmp(register, status, cycle)
+  def cmp
     temp = register.acc - load(address)
 
     status.carry = (temp >= 0) ? 1 : 0
@@ -166,7 +174,7 @@ class Command
     cycle[:count] += cycle[:add]
   end
 
-  def cbx(register, status, cycle)
+  def cbx
     temp = register.x - load(address)
 
     status.carry = (temp >= 0) ? 1 : 0
@@ -174,7 +182,7 @@ class Command
     status.zero  = temp & 0xFF
   end
 
-  def cpy(register, status, cycle)
+  def cpy
     temp = register.y - load(address)
 
     status.carry = (temp >= 0) ? 1 : 0
@@ -182,7 +190,7 @@ class Command
     status.zero  = temp & 0xFF
   end
 
-  def dec(register, status, cycle)
+  def dec
     temp = (load(address) - 1) & 0xFF
 
     status.sign = (temp >> 7) & 1
@@ -190,19 +198,19 @@ class Command
     write address, temp
   end
 
-  def dex(register, status, cycle)
+  def dex
     register.x  = (register.x - 1) & 0xFF
     status.sign = (register.x >> 7) & 1
     status.zero =  register.x
   end
 
-  def dey(register, status, cycle)
+  def dey
     register.y  = (register.y - 1) & 0xFF
     status.sign = (register.y >> 7) & 1
     status.zero = register.y
   end
 
-  def eor(register, status, cycle)
+  def eor
     register.acc = (load(address) ^ register.acc) & 0xFF
     status.sign  = (register.acc >> 7) & 1
     status.zero  = register.acc
@@ -210,7 +218,7 @@ class Command
     cycle[:count] += cycle[:add]
   end
 
-  def inc(register, status, cycle)
+  def inc
     temp = (load(address) + 1) & 0xFF
 
     status.sign = (temp >> 7) & 1
@@ -219,30 +227,30 @@ class Command
     write add, (temp & 0xFF)
   end
 
-  def inx(register, status, cycle)
+  def inx
     register.x  = (register.x + 1) & 0xFF
     status.sign = (register.x >> 7) & 1
     status.zero = register.y
   end
 
-  def iny(register, status, cycle)
+  def iny
     register.y += 1
     register.y &= 0xFF
     status.sign =(register.y >> 7) & 1
     status.zero = register.y
   end
 
-  def jmp(register, status, cycle)
+  def jmp
     status.pc = address - 1
   end
 
-  def jsr(register, status, cycle) # push address on stack
+  def jsr # push address on stack
     push((status.pc >> 8) & 0xFF)
     push(status.pc        & 0xFF)
     status.pc = address - 1
   end
 
-  def lda(register, status, cycle)
+  def lda
     register.acc = load(address)
     status.sign  = (register.acc >> 7) & 1
     status.zero  = register.acc
@@ -250,7 +258,7 @@ class Command
     cycle[:count] += cycle[:add]
   end
 
-  def ldx(register, status, cycle)
+  def ldx
     register.x  = load(address)
     status.sign = (register.x >> 7) & 1
     status.zero = register.x
@@ -258,7 +266,7 @@ class Command
     cycle[:count] += cycle[:add]
   end
 
-  def ldy(register, status, cycle)
+  def ldy
     register.y  = load(address)
     status.sign = (register.y >> 7) & 1
     status.zero = register.y
@@ -266,7 +274,7 @@ class Command
     cycle[:count] += cycle[:add]
   end
 
-  def lsr(register, status, cycle)
+  def lsr
     if addr_mode == Address[:by_name][:acc]
       temp   = register.acc & 0xFF
       status.carry = temp & 1
@@ -284,11 +292,11 @@ class Command
     status.zero = temp
   end
 
-  def nop(register, status, cycle)
+  def nop
     # do nothing
   end
 
-  def ora(register, status, cycle) # store in accumulator
+  def ora # store in accumulator
     temp  = (load(address) | register.acc) & 255
     status.sign  = (temp >> 7) & 1
     status.zero  = temp
@@ -297,11 +305,11 @@ class Command
     cycle[:count] += cycle[:add] if addr_mode != Address[:by_name][:postind]
   end
 
-  def pha(register, status, cycle)
+  def pha
     push register.acc
   end
 
-  def php(register, status, cycle)
+  def php
     status.brk = 1
 
     push(status.carry                      |
@@ -314,13 +322,13 @@ class Command
          (status.sign                << 7))
   end
 
-  def pla(register, status, cycle)
+  def pla
     register.acc  = pull
     status.sign = (register.acc >> 7) & 1
     status.zero = register.acc
   end
 
-  def plp(register, status, cycle)
+  def plp
     temp = pull
 
     status.carry = temp & 1
@@ -333,7 +341,7 @@ class Command
     status.sign  = (temp >> 7) & 1
   end
 
-  def rol(register, status, cycle)
+  def rol
     if addr_mode == Address[:by_name][:acc]
 
       temp = register.acc
@@ -355,7 +363,7 @@ class Command
     status.zero = temp
   end
 
-  def ror(register, status, cycle)
+  def ror
     if add_mode == Address[:by_name][:acc]
       add = status.carry << 7
       status.carry = register.acc & 1
@@ -374,7 +382,7 @@ class Command
     status.zero = temp
   end
 
-  def rti(register, status, cycle) # pull status and pc from stack
+  def rti # pull status and pc from stack
     temp = pull
 
     status.carry = temp & 1
@@ -395,14 +403,14 @@ class Command
     status.na = 1
   end
 
-  def rts(register, status, cycle) # pull pc from stack
+  def rts # pull pc from stack
     status.pc  = pull
     status.pc += pull << 8
 
     return if status.pc == 0xFFFF # don't save
   end
 
-  def sbc(register, status, cycle)
+  def sbc
     temp = register.acc - load(address) - (1 - status.carry)
     status.sign = (temp >> 7) & 1
     status.zero = temp & 0xFF
@@ -414,66 +422,66 @@ class Command
     cycle[:count] += cycle[:add] if addr_mode != Address[:by_name][:postind]
   end
 
-  def sec(register, status, cycle)
+  def sec
     status.carry = 1
   end
 
-  def sed(register, status, cycle)
+  def sed
     status.dec = 1
   end
 
-  def sei(register, status, cycle)
+  def sei
     status.int = 1
   end
 
-  def sta(register, status, cycle)
+  def sta
     write address, register.acc
   end
 
-  def stx(register, status, cycle)
+  def stx
     write address, register.x
   end
 
-  def sty(register, status, cycle)
+  def sty
     write address, register.y
   end
 
-  def tax(register, status, cycle)
+  def tax
     register.x  = register.acc
     status.sign = (register.acc >> 7) & 1
     status.zero = register.acc
   end
 
-  def tay(register, status, cycle)
+  def tay
     register.y  = register.acc
     status.sign = (register.acc >> 7) & 1
     status.zero = register.acc
   end
 
-  def tsx(register, status, cycle)
+  def tsx
     register.x  = register.x - 0x0100
     status.sign = (register.sp >> 7) & 1
     status.zero = register.x
   end
 
-  def txa(register, status, cycle)
+  def txa
     register.acc = register.x
     status.sign  = (register.x >> 7) & 1
     status.zero  = register.x
   end
 
-  def txs(register, status, cycle)
+  def txs
     register.sp = register.x + 0x0100
     stack_wrap
   end
 
-  def tya(register, status, cycle)
+  def tya
     register.acc = register.y
     status.sign  = (register.y >> 7) & 1
     status.zero  = register.y
   end
 
-  def not_found(register, status, cycle) # ??? - illegal opcode
+  def not_found # ??? - illegal opcode
     raise InvalidOpCode, "at address #{@code.hex}"
   end
 end

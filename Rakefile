@@ -11,5 +11,7 @@ task(:default) do
                -r address
                -r instruction
 
-               -r operation|
+               -r operation
+               -r op_code
+               -r cpu|
 end

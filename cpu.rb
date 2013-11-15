@@ -28,7 +28,14 @@ class CPU
   end
 
   def execute(code, address, cycle)
-    Command.new(code, address).execute register, status, cycle
+    OpCode[code].n do |op_code|
+      op_code.address  = address
+      op_code.register = @register
+      op_code.status   = @status
+      op_code.cycle    = cycle
+
+      op_code.execute
+    end
   end
 
   def status
