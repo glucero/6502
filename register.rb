@@ -33,6 +33,15 @@ Register = Struct.new(
   # machine language programs, and by the computer.
   ) do
 
+  def set(value)
+    acc  =
+    x    =
+    y    =
+    stat =
+    pc   =
+    sp   = value
+  end
+
   def self.init
     new *[FLUSH]*6
   end

@@ -1,8 +1,7 @@
 class Instruction
 
-  # The 6502 microprocessor instruction set:
+  CODES = [ # The 6502 microprocessor instruction set:
 
-  CODES = [
     :adc, # add memory to accumulator with carry
     :and, # 'and' memory with accumulator
     :asl, # shift left one bit (memory or accumulator)

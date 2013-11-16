@@ -33,6 +33,18 @@ Status = Struct.new(
   # positive.
   ) do
 
+  def reset
+    carry =
+    dec   =
+    over  =
+    sign  =
+    zero  = 0
+
+    int =
+    na  =
+    brk = 1
+  end
+
   def value
     (carry    ) |
     (zero << 1) |
