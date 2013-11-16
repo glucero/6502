@@ -43,7 +43,7 @@ Register = Struct.new(
   end
 
   def initialize
-    super *[FLUSH]*6
+    super *Array.new(6, 0xFF)
   end
 end
 

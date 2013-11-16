@@ -9,8 +9,8 @@ class CPU
     @status.na  =
     @status.int = 1
 
-    @crash         =
-    @irq_requested = false
+    @crash   =
+    @irq_req = false
   end
 
   def start

@@ -74,7 +74,7 @@ Status = Struct.new(
   end
 
   def initialize
-    super *[FLUSH]*8
+    super *Array.new(8, 0xFF)
   end
 end
 

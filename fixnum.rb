@@ -1,5 +1,3 @@
-FLUSH = 0xFF
-
 class Fixnum
 
   def hex
