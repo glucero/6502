@@ -1,6 +1,6 @@
-Address = {
+class Address
 
-  by_code: [ # Instructions need operands to work on. There are various ways
+  MODES = [ # Instructions need operands to work on. There are various ways
   # of indicating where the processor is to get these operands. The different
   # methods used to do this are called addressing modes. The 6502 offers 11
   # modes, as described below.
@@ -128,7 +128,14 @@ Address = {
     # the address to jump to - i.e. 0x3076 (remember that addresses are stored
     # with low byte first).
   ]
-}.tap do |address|
-  address[:by_name] = Hash[address[:by_code].zip 0...address[:by_code].count]
+
+  def self.find(options = {})
+    type, value = options.flatten
+
+    case type
+    when :code then MODES[value]
+    when :name then MODES.index(value)
+    end
+  end
 end
 

@@ -788,8 +788,8 @@ class Operation
     Table.each do |instruction, addresses|
       addresses.each do |address, (code, bytes, cycles)|
 
-        inst = Instruction[:by_name][instruction]
-        addr = Address[:by_name][address]
+        inst = Instruction.find(name: instruction)
+        addr = Address.find(name: address)
 
         table[code] = ((inst   & 0xFF))       |
                       ((addr   & 0xFF) << 8)  |

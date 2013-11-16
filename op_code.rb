@@ -1,9 +1,8 @@
 class OpCode
 
-  class InvalidOpCode < StandardError; end
+  class Invalid < StandardError; end
 
-  attr_accessor :code,
-                :address,
+  attr_accessor :address,
                 :register,
                 :status,
                 :cycle
@@ -15,7 +14,7 @@ class OpCode
   end
 
   def execute
-    send Instruction[:by_code].fetch(code & 0xFF, :not_found)
+    send(Instruction.find(code: @code & 0xFF) || :not_found)
   end
 
   private
@@ -38,11 +37,11 @@ class OpCode
     status.sign   = (register.acc >> 7) & 1
     status.zero   =  register.acc
 
-    cycle[:count] += cycle[:add] if addr_mode != Address[:by_name][:postind]
+    cycle[:count] += cycle[:add] if addr_mode != Address.find(name: :postind)
   end
 
   def asl
-    if Address[:by_name][:acc] == addr_mode
+    if Address.find(name: :acc) == addr_mode
 
       status.carry = (register.acc >> 7) & 1
       register.acc = (register.acc << 1) & 255
@@ -275,7 +274,7 @@ class OpCode
   end
 
   def lsr
-    if addr_mode == Address[:by_name][:acc]
+    if addr_mode == Address.find(name: :acc)
       temp   = register.acc & 0xFF
       status.carry = temp & 1
       temp >>= 1
@@ -302,7 +301,7 @@ class OpCode
     status.zero  = temp
     register.acc = temp
 
-    cycle[:count] += cycle[:add] if addr_mode != Address[:by_name][:postind]
+    cycle[:count] += cycle[:add] if addr_mode != Address.find(name: :postind)
   end
 
   def pha
@@ -342,7 +341,7 @@ class OpCode
   end
 
   def rol
-    if addr_mode == Address[:by_name][:acc]
+    if addr_mode == Address.find(name: :acc)
 
       temp = register.acc
       add  = status.carry
@@ -364,7 +363,7 @@ class OpCode
   end
 
   def ror
-    if add_mode == Address[:by_name][:acc]
+    if add_mode == Address.find(name: :acc)
       add = status.carry << 7
       status.carry = register.acc & 1
       temp = (register.acc >> 1) + add
@@ -419,7 +418,7 @@ class OpCode
     status.carry = (temp < 0) ? 0 : 1
     register.acc = temp & 0xFF
 
-    cycle[:count] += cycle[:add] if addr_mode != Address[:by_name][:postind]
+    cycle[:count] += cycle[:add] if addr_mode != Address.find(name: :postind)
   end
 
   def sec
@@ -481,7 +480,7 @@ class OpCode
     status.zero  = register.y
   end
 
-  def not_found # ??? - illegal opcode
-    raise InvalidOpCode, "at address #{@code.hex}"
+  def not_found # ??? - invalid opcode
+    raise Invalid, @code.hex
   end
 end

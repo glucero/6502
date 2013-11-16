@@ -1,9 +1,8 @@
-Instruction = {
+class Instruction
 
   # The 6502 microprocessor instruction set:
 
-  by_code: [
-
+  CODES = [
     :adc, # add memory to accumulator with carry
     :and, # 'and' memory with accumulator
     :asl, # shift left one bit (memory or accumulator)
@@ -61,7 +60,14 @@ Instruction = {
     :txs, # transfer index x to stack pointer
     :tya  # transfer index y to accumulator
   ]
-}.tap do |instruction|
-  instruction[:by_name] = Hash[instruction[:by_code].zip 0...instruction[:by_code].count]
+
+  def self.find(options = {})
+    type, value = options.flatten
+
+    case type
+    when :code then CODES[value]
+    when :name then CODES.index(value)
+    end
+  end
 end
 
