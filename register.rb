@@ -42,8 +42,8 @@ Register = Struct.new(
     sp   = value
   end
 
-  def self.init
-    new *[FLUSH]*6
+  def initialize
+    super *[FLUSH]*6
   end
 end
 

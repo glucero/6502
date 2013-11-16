@@ -45,6 +45,12 @@ Status = Struct.new(
     brk = 1
   end
 
+  def clone
+    clone.tap do |status|
+      status.zero.zero? ? 1 : 0
+    end
+  end
+
   def value
     (carry    ) |
     (zero << 1) |
@@ -67,8 +73,8 @@ Status = Struct.new(
     sign  = (value >> 7) & 1
   end
 
-  def self.init
-    new *[FLUSH]*8
+  def initialize
+    super *[FLUSH]*8
   end
 end
 
