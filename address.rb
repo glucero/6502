@@ -1,5 +1,9 @@
 class Address
 
+  class InvalidAddressCode < StandardError; end
+  class InvalidAddressName < StandardError; end
+  class InvalidAddressType < StandardError; end
+
   MODES = [ # Instructions need operands to work on. There are various ways
   # of indicating where the processor is to get these operands. The different
   # methods used to do this are called addressing modes. The 6502 offers 11
@@ -129,12 +133,21 @@ class Address
     # with low byte first).
   ]
 
-  def self.find(options = {})
-    type, value = options.flatten
+  class << self
+    def code(value)
+      MODE[value] or raise(InvalidAddressCode, value)
+    end
 
-    case type
-    when :code then MODES[value]
-    when :name then MODES.index(value)
+    def name(value)
+      MODE.index(value) or raise(InvalidAddressName, value)
+    end
+
+    def find(options = {})
+      if address = options.shift
+        send *address
+      else
+        raise InvalidAddressType, value
+      end
     end
   end
 end

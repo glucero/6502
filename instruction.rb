@@ -1,5 +1,9 @@
 class Instruction
 
+  class InvalidAddressCode < StandardError; end
+  class InvalidAddressName < StandardError; end
+  class InvalidAddressType < StandardError; end
+
   CODES = [ # The 6502 microprocessor instruction set:
 
     :adc, # add memory to accumulator with carry
@@ -60,12 +64,21 @@ class Instruction
     :tya  # transfer index y to accumulator
   ]
 
-  def self.find(options = {})
-    type, value = options.flatten
+  class << self
+    def code(value)
+      CODE[value] or raise(InvalidInstructionCode, value)
+    end
 
-    case type
-    when :code then CODES[value]
-    when :name then CODES.index(value)
+    def name(value)
+      CODE.index(value) or raise(InvalidInstructionName, value)
+    end
+
+    def find(options = {})
+      if instruction = options.shift
+        send *instruction
+      else
+        raise InvalidInstructionType, value
+      end
     end
   end
 end

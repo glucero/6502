@@ -1,6 +1,6 @@
 class OpCode
 
-  class Invalid < StandardError; end
+  class InvalidOpCode < StandardError; end
 
   attr_accessor :address,
                 :register,
@@ -481,6 +481,6 @@ class OpCode
   end
 
   def not_found # ??? - invalid opcode
-    raise Invalid, @code.hex
+    raise InvalidOpCode, @code.hex
   end
 end
