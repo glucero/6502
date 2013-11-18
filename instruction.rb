@@ -1,10 +1,10 @@
 class Instruction
 
-  class InvalidAddressCode < StandardError; end
-  class InvalidAddressName < StandardError; end
-  class InvalidAddressType < StandardError; end
+  class InvalidInstructionCode < StandardError; end
+  class InvalidInstructionName < StandardError; end
+  class InvalidInstructionType < StandardError; end
 
-  CODES = [ # The 6502 microprocessor instruction set:
+  TABLE = [ # The 6502 microprocessor instruction set:
 
     :adc, # add memory to accumulator with carry
     :and, # 'and' memory with accumulator
@@ -66,18 +66,20 @@ class Instruction
 
   class << self
     def code(value)
-      CODE[value] or raise(InvalidInstructionCode, value)
+      TABLE[value] or raise(InvalidInstructionCode, value)
     end
 
     def name(value)
-      CODE.index(value) or raise(InvalidInstructionName, value)
+      TABLE.index(value) or raise(InvalidInstructionName, value)
     end
 
-    def find(options = {})
-      if instruction = options.shift
-        send *instruction
+    def find(**options)
+      type, value = options.shift
+
+      if type && value && respond_to?(type)
+        send type, value
       else
-        raise InvalidInstructionType, value
+        raise InvalidInstructionType, type
       end
     end
   end
