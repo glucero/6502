@@ -66,11 +66,15 @@ class Instruction
 
   class << self
     def code(value)
-      TABLE[value] or raise(InvalidInstructionCode, value)
+      TABLE[value] || raise
+    rescue Exception
+      raise InvalidInstructionCode, value
     end
 
     def name(value)
-      TABLE.index(value) or raise(InvalidInstructionName, value)
+      TABLE.index(value) || raise
+    rescue Exception
+      raise InvalidInstructionName, value
     end
 
     def find(**options)
