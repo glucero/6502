@@ -1,7 +1,5 @@
 class OpCode
 
-  class InvalidOpCode < StandardError; end
-
   attr_accessor :address,
                 :register,
                 :status,
@@ -14,7 +12,7 @@ class OpCode
   end
 
   def execute
-    send(Instruction.find(code: @code & 0xFF) || :not_found)
+    send Instruction.find(code: @code & 0xFF)
   end
 
   private
@@ -37,11 +35,11 @@ class OpCode
     status.sign   = (register.acc >> 7) & 1
     status.zero   =  register.acc
 
-    cycle[:count] += cycle[:add] if addr_mode != Address.find(name: :postind)
+    cycle[:count] += cycle[:add] if addr_mode != Address[:postind]
   end
 
   def asl
-    if Address.find(name: :acc) == addr_mode
+    if Address[:acc] == addr_mode
 
       status.carry = (register.acc >> 7) & 1
       register.acc = (register.acc << 1) & 255
@@ -274,7 +272,7 @@ class OpCode
   end
 
   def lsr
-    if addr_mode == Address.find(name: :acc)
+    if addr_mode == Address[:acc]
       temp   = register.acc & 0xFF
       status.carry = temp & 1
       temp >>= 1
@@ -301,7 +299,7 @@ class OpCode
     status.zero  = temp
     register.acc = temp
 
-    cycle[:count] += cycle[:add] if addr_mode != Address.find(name: :postind)
+    cycle[:count] += cycle[:add] if addr_mode != Address[:postind]
   end
 
   def pha
@@ -341,7 +339,7 @@ class OpCode
   end
 
   def rol
-    if addr_mode == Address.find(name: :acc)
+    if addr_mode == Address[:acc]
 
       temp = register.acc
       add  = status.carry
@@ -363,7 +361,7 @@ class OpCode
   end
 
   def ror
-    if add_mode == Address.find(name: :acc)
+    if add_mode == Address[:acc]
       add = status.carry << 7
       status.carry = register.acc & 1
       temp = (register.acc >> 1) + add
@@ -418,7 +416,7 @@ class OpCode
     status.carry = (temp < 0) ? 0 : 1
     register.acc = temp & 0xFF
 
-    cycle[:count] += cycle[:add] if addr_mode != Address.find(name: :postind)
+    cycle[:count] += cycle[:add] if addr_mode != Address[:postind]
   end
 
   def sec
@@ -478,9 +476,5 @@ class OpCode
     register.acc = register.y
     status.sign  = (register.y >> 7) & 1
     status.zero  = register.y
-  end
-
-  def not_found # ??? - invalid opcode
-    raise InvalidOpCode, @code.hex
   end
 end

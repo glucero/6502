@@ -1,7 +1,7 @@
 class Operation
 
-  # The following notation applies to this summary:
-  #
+  TABLE = { # The following notation applies to this summary:
+
   #    A       Accumulator                  EOR     Logical Exclusive Or
   #    X, Y    Index Registers              fromS   Transfer from Stack
   #    M       Memory                       toS     Transfer to Stack
@@ -13,7 +13,6 @@ class Operation
   #    &&      Logical AND                  PCL     Program Counter Low
   #    -       Subtract                     OPER    Operand
   #                                         #       Immediate Addressing Mode
-  Table = {
 
     adc: {
     # Operation:  A + M + C -> A, C
@@ -777,7 +776,7 @@ class Operation
   }
 
   def [](inst, addr)
-    table[ Table[inst][addr][0] ]
+    table[ TABLE[inst][addr][0] ]
   end
 
   def table
@@ -785,7 +784,7 @@ class Operation
   end
 
   def initialize
-    Table.each do |instruction, addresses|
+    TABLE.each do |instruction, addresses|
       addresses.each do |address, (code, bytes, cycles)|
 
         inst = Instruction.find(name: instruction)
